@@ -1,0 +1,65 @@
+<!DOCTYPE html><html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#050914">
+<title>NEXAR AI</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#050914;color:#eaf7ff;font-family:Arial,sans-serif;min-height:100vh}
+header{padding:22px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #15304a}
+.logo{font-size:24px;font-weight:bold;letter-spacing:5px;color:#70e7ff}
+.status{font-size:11px;color:#63efbd}
+main{max-width:600px;margin:auto;padding:25px 18px}
+h1{text-align:center;font-size:25px;font-weight:400;margin:12px 0}
+.subtitle{text-align:center;color:#829ab6;font-size:13px}
+.orb-wrap{height:240px;display:flex;align-items:center;justify-content:center}
+.orb{width:150px;height:150px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#d8ffff 0%,#50dfff 8%,#1461a9 35%,#07152f 68%,#030711 75%);box-shadow:0 0 25px #168aff,0 0 65px #0879c777,inset 0 0 25px #9af5ff;animation:pulse 3s infinite;position:relative}
+.orb:before,.orb:after{content:"";position:absolute;inset:-15px;border-radius:50%;border:1px solid #48cfff88;transform:rotateX(65deg)}
+.orb:after{inset:-27px;transform:rotateX(65deg) rotateY(35deg);border-color:#a4aaff55}
+@keyframes pulse{50%{transform:scale(1.06);box-shadow:0 0 40px #168aff,0 0 90px #0879c799}}
+#state{text-align:center;color:#70e7ff;font-size:13px;letter-spacing:2px;margin-bottom:25px}
+.panel{background:#0a1424;border:1px solid #1b3552;border-radius:16px;padding:16px;margin-top:16px}
+.panel-title{font-size:12px;color:#70e7ff;letter-spacing:2px;margin-bottom:12px}
+#chat{height:180px;overflow-y:auto;font-size:14px;line-height:1.6}
+.msg{padding:9px 11px;border-radius:10px;margin:8px 0;background:#102238;overflow-wrap:anywhere}
+.user{border-left:2px solid #55dfff}
+.bot{border-left:2px solid #55e7b1}
+.controls{display:flex;gap:9px;margin-top:12px}
+input{min-width:0;flex:1;background:#050b16;color:white;border:1px solid #28435f;border-radius:10px;padding:13px;font-size:14px}
+button{background:#10304b;color:#8deaff;border:1px solid #27759a;border-radius:10px;padding:12px;font-size:14px;cursor:pointer}
+.send{background:#087fa7;color:white}
+.voice{width:100%;margin-top:12px}
+.note{font-size:11px;color:#7389a3;text-align:center;margin:22px 0}
+</style>
+</head>
+<body>
+<header><div class="logo">NEXAR</div><div class="status">● SISTEMA INICIADO</div></header>
+<main>
+<h1>Su asistente personal</h1>
+<p class="subtitle">INTELIGENCIA ARTIFICIAL · INTERFAZ EXPERIMENTAL</p>
+<div class="orb-wrap"><div class="orb"></div></div>
+<div id="state">A LA ESPERA DE ÓRDENES</div>
+<section class="panel">
+<div class="panel-title">COMUNICACIÓN</div>
+<div id="chat"><div class="msg bot">NEXAR: Hola, señor. Mi interfaz está activa. ¿En qué puedo ayudarle?</div></div>
+<div class="controls">
+<input id="input" placeholder="Escriba un mensaje..." autocomplete="off">
+<button class="send" onclick="sendMsg()">Enviar</button>
+</div>
+<button class="voice" onclick="listen()">🎙 Hablar con NEXAR</button>
+</section>
+<p class="note">NEXAR v0.1 · PROTOTIPO DE INTERFAZ</p>
+</main>
+<script>
+const chat=document.getElementById('chat');
+const input=document.getElementById('input');
+const state=document.getElementById('state');
+function addMsg(text,who){const d=document.createElement('div');d.className='msg '+who;d.textContent=text;chat.appendChild(d);chat.scrollTop=chat.scrollHeight}
+function reply(text){let t=text.toLowerCase();if(/hola|buenos días|buenas tardes/.test(t))return 'Saludos, señor. NEXAR está a su servicio.';if(/cómo estás|como estas/.test(t))return 'Todos los sistemas de la interfaz funcionan correctamente, señor.';if(/tu nombre|quién eres|quien eres/.test(t))return 'Soy NEXAR, su asistente personal experimental.';if(/hora/.test(t))return 'La hora de su dispositivo es '+new Date().toLocaleTimeString('es-AR')+'.';if(/fecha|día|dia/.test(t))return 'La fecha es '+new Date().toLocaleDateString('es-AR')+'.';if(/ayuda|comandos/.test(t))return 'Puede saludarme, preguntar la hora o la fecha, o probar el micrófono. Aún no estoy conectado a un modelo de IA externo.';return 'He recibido su mensaje, señor. Todavía necesito conectarme a un servicio de inteligencia artificial para responder preguntas abiertas.'}
+function sendMsg(){let t=input.value.trim();if(!t)return;addMsg('Usted: '+t,'user');input.value='';state.textContent='PROCESANDO';setTimeout(()=>{let r=reply(t);addMsg('NEXAR: '+r,'bot');state.textContent='A LA ESPERA DE ÓRDENES'},400)}
+input.addEventListener('keydown',e=>{if(e.key==='Enter')sendMsg()});
+function listen(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){addMsg('NEXAR: Su navegador no permite reconocimiento de voz en esta página. Pruebe con Chrome y compruebe los permisos del micrófono.','bot');return}const rec=new SR();rec.lang='es-AR';rec.onstart=()=>state.textContent='ESCUCHANDO';rec.onresult=e=>{input.value=e.results[0][0].transcript;sendMsg()};rec.onerror=()=>{state.textContent='A LA ESPERA DE ÓRDENES';addMsg('NEXAR: No pude acceder al micrófono. Compruebe los permisos del navegador.','bot')};rec.onend=()=>{if(state.textContent==='ESCUCHANDO')state.textContent='A LA ESPERA DE ÓRDENES'};rec.start()}
+</script>
+</body>
+  </html>
